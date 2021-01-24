@@ -1,6 +1,9 @@
 {
     "name": "wildfire/restapi",
     "description": "PHP library to create rest APIs quickly",
+    "require": {
+        "ext-json": "*"
+    },
     "autoload": {
         "psr-4": {
             "Wildfire\\RestAPI\\": "src/"
