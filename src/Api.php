@@ -103,4 +103,44 @@ class Api {
     private function close() {
         exit();
     }
+
+    /*
+    Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.
+     */
+    public function isValidJsonRequest() {
+
+        $url_headers = getallheaders();
+        $error = 0;
+
+        if (is_array($url_headers['Content-Type']) && in_array('application/vnd.api+json', $url_headers['Content-Type'])) {
+            //In some responses Content-type is an array
+            $error = 1;
+
+        } else if (strstr($url_headers['Content-Type'], 'application/vnd.api+json')) {
+            $error = 1;
+        }
+        if ($error) {
+            $this->send(415);
+        } else {
+            return true;
+        }
+
+    }
+
+    /*
+    This small helper function generates RFC 4122 compliant Version 4 UUIDs.
+     */
+    public function guidv4($data = null) {
+        // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+        $data = $data ?? random_bytes(16);
+        assert(strlen($data) == 16);
+
+        // Set version to 0100
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        // Set bits 6-7 to 10
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+        // Output the 36 character UUID.
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
 }

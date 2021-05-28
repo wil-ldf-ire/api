@@ -1,6 +1,6 @@
 {
     "name": "wildfire/api",
-    "description": "JSON APIs for Tribe",
+    "description": "JSON API for Tribe",
     "require": {
         "ext-json": "*"
     },
