@@ -122,6 +122,7 @@ class Api {
         }
         if ($error) {
             $this->response->send(415);
+            die();
         } else {
             return true;
         }
