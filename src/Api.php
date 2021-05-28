@@ -117,7 +117,7 @@ class Api {
             //In some responses Content-type is an array
             $error = 1;
 
-        } else if (strstr($this->url_headers['Content-Type'], 'application/vnd.api+json')) {
+        } else if (!strstr($this->url_headers['Content-Type'], 'application/vnd.api+json')) {
             $error = 1;
         }
         if ($error) {
