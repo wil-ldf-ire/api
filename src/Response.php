@@ -3,6 +3,13 @@ namespace Wildfire\Api;
 
 class Response {
     private $response;
+    private Api $api;
+    private Request $request;
+
+    public function __construct() {
+        $this->api = new Api();
+        $this->request = new Request();
+    }
 
     /**
      * writes data to response property
@@ -31,6 +38,17 @@ class Response {
      */
     public function send($status_code = 200) {
         http_response_code($status_code);
+        $this->response['status'] = $status_code;
+
+        if (!$this->response['id']) {
+            $this->response['id'] = $this->api->guidv4();
+        }
+
+        if ($status_code == 415) {
+            $this->response['title'] = 'Unsupported Media Type';
+            $this->response['detail'] = 'Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.';
+        }
+
         echo $this->response;
     }
 }
