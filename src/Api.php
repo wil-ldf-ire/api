@@ -8,12 +8,12 @@ class Api {
     // request made by client
     private Request $request;
 
-    private $url_headers;
+    private $request_headers;
 
     public function __construct() {
         $this->response = new Response();
         $this->request = new Request();
-        $this->url_headers = getallheaders();
+        $this->request_headers = $this->request->getHeaders();
     }
 
     /**
@@ -113,11 +113,11 @@ class Api {
     public function isValidJsonRequest() {
         $error = 0;
 
-        if (is_array($this->url_headers['Content-Type']) && in_array('application/vnd.api+json', $this->url_headers['Content-Type'])) {
+        if (is_array($this->request_headers['Content-Type']) && in_array('application/vnd.api+json', $this->request_headers['Content-Type'])) {
             //In some responses Content-type is an array
             $error = 1;
 
-        } else if (strstr($this->url_headers['Content-Type'], 'application/vnd.api+json')) {
+        } else if (strstr($this->request_headers['Content-Type'], 'application/vnd.api+json')) {
             $error = 1;
         }
         if ($error) {

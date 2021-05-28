@@ -33,6 +33,11 @@ class Response {
         } else if ($status_code == 415) {
             $this->response['title'] = 'Unsupported Media Type';
             $this->response['detail'] = 'Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.';
+        } else if ($status_code == 400) {
+            $this->response['title'] = 'Bad Request';
+        } else if ($status_code == 401) {
+            $this->response['title'] = 'Access Denied';
+            $this->response['detail'] = 'Stop.';
         }
 
         echo json_encode($this->response);
