@@ -14,4 +14,8 @@ class Request {
     {
         return $this->postBody;
     }
+
+    public function getHeaders() {
+        return getallheaders();
+    }
 }
