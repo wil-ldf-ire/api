@@ -42,7 +42,7 @@ class Response {
             $this->response['detail'] = 'Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.';
         }
 
-        echo $this->response;
+        echo json_encode($this->response);
     }
 
     /*
