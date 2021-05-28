@@ -8,9 +8,12 @@ class Api {
     // request made by client
     private Request $request;
 
+    private $headers;
+
     public function __construct() {
         $this->response = new Response();
         $this->request = new Request();
+        $this->headers = getallheaders();
     }
 
     /**
@@ -108,19 +111,17 @@ class Api {
     Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.
      */
     public function isValidJsonRequest() {
-
-        $url_headers = getallheaders();
         $error = 0;
 
-        if (is_array($url_headers['Content-Type']) && in_array('application/vnd.api+json', $url_headers['Content-Type'])) {
+        if (is_array($this->headers['Content-Type']) && in_array('application/vnd.api+json', $this->headers['Content-Type'])) {
             //In some responses Content-type is an array
             $error = 1;
 
-        } else if (strstr($url_headers['Content-Type'], 'application/vnd.api+json')) {
+        } else if (strstr($this->headers['Content-Type'], 'application/vnd.api+json')) {
             $error = 1;
         }
         if ($error) {
-            $this->send(415);
+            $this->response->send(415);
         } else {
             return true;
         }
