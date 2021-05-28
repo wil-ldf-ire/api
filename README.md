@@ -1,14 +1,12 @@
-# Wildfire Rest API
-### Dependency for Wildfire\Core
-
-This package helps in getting started with Rest APIs quickly without a lot of code;
+# Wildfire Tribe Server-side JSON API
+JSON API implementation based on https://jsonapi.org/format
 
 **Quick Start Guide**  
 Starting template:
 ```php
-use Wildfire\RestAPI\Api;
-use Wildfire\RestAPI\Request;
-use Wildfire\RestAPI\Response;
+use Wildfire\Api\Api;
+use Wildfire\Api\Request;
+use Wildfire\Api\Response;
 
 $api = new Api();
 

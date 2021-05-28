@@ -1,8 +1,7 @@
 <?php
-namespace Wildfire\RestAPI;
+namespace Wildfire\Api;
 
-class Response
-{
+class Response {
     private $response;
 
     /**
@@ -10,8 +9,7 @@ class Response
      * @param $response
      * @return $this
      */
-    public function body($response) : Response
-    {
+    public function body($response): Response{
         $this->response = $response;
         return $this;
     }
@@ -21,9 +19,8 @@ class Response
      * @param $response
      * @return $this
      */
-    public function json($response) : Response
-    {
-        header('Content-Type: application/json');
+    public function json($response): Response{
+        header('Content-Type: application/vnd.api+json');
         $this->response = json_encode($response);
         return $this;
     }
@@ -32,8 +29,7 @@ class Response
      * sets http code to response and responds to the request
      * @param int $status_code
      */
-    public function send($status_code = 200)
-    {
+    public function send($status_code = 200) {
         http_response_code($status_code);
         echo $this->response;
     }
