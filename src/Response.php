@@ -37,7 +37,10 @@ class Response {
             $this->response['id'] = $this->guidv4();
         }
 
-        if ($status_code == 415) {
+        if ($status_code == 200) {
+            $this->response['title'] = 'OK';
+            $this->response['detail'] = 'Successful.';
+        } else if ($status_code == 415) {
             $this->response['title'] = 'Unsupported Media Type';
             $this->response['detail'] = 'Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.';
         }
