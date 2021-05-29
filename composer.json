@@ -1,6 +1,20 @@
 {
     "name": "wildfire/api",
     "description": "JSON API for Tribe",
+    "repositories": {
+        "wildfire/core": {
+            "type": "git",
+            "url": "https://github.com/wil-ldf-ire/core.git"
+        },
+        "wildfire/auth": {
+            "type": "git",
+            "url": "https://github.com/wil-ldf-ire/auth.git"
+        }
+    },
+    "require": {
+    	"wildfire/core": "^1.1",
+    	"wildfire/auth": "^1.1"
+    },
     "autoload": {
         "psr-4": {
             "Wildfire\\Api\\": "src/"
