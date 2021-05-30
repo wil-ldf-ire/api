@@ -13,7 +13,10 @@ $menus = $dash->getMenus();
 $currentUser = $auth->getCurrentUser();
 
 if (!$currentUser['id']) {
-    $api->response->send(401);
+    $url_words = explode($_SERVER['REQUEST_URI']);
+    include_once __DIR__ . '/' . $url_words[1] . '/auth.php';
+    //$api->response->send(401);
 } else {
-    print_r($api->getRequestHeaders());
+    $url_words = explode($_SERVER['REQUEST_URI']);
+    include_once __DIR__ . '/' . $url_words[1] . '/auth.php';
 }
