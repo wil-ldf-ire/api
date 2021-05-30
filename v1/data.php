@@ -39,7 +39,7 @@ if ($currentUser['id']) {
     $type = $thisUriArray[3];
     if ($type != 'search' && ($thisUriArray[4] ?? false)) {
 
-        if (is_int($thisUriArray[4])) {
+        if (is_numeric($thisUriArray[4])) {
             $id = $thisUriArray[4];
             $slug = $dash->get_content_meta($thisUriArray[4], 'slug');
         } else if ($slug = ($thisUriArray[4] ?? false)) {
