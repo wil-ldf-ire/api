@@ -1,16 +1,16 @@
 <?php
 header('Content-Type: application/vnd.api+json');
 
-$api_auth_post_data = $api->getRequestBody();
+$userpass = explode(':', base64_decode(explode(' ', $api->getRequestHeaders()['Authorization'])[1]));
 
-$user_id = (string) json_decode($sql->executeSQL("
-    SELECT `content`->'$.user_id' `user_id` FROM `data`
-    WHERE
-    `content`->'$.api_key'='" . $api_auth_post_data['api_key'] . "' &&
-    `content`->'$.api_secret'='" . $api_auth_post_data['api_secret'] . "' &&
-    `content`->'$.type'='api_key_secret'")[0]['user_id'], true);
+$accessArray = $auth->getApiAccess($userpass[0], $userpass[1]);
 
-echo json_encode($dash->get_user($user_id));
+if ($accessArray) {
+    echo json_encode($accessArray);
+} else {
+    //Access denied
+    $api->sendResponse(401);
+}
 
 exit();
 ?>

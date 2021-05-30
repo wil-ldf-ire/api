@@ -10,13 +10,16 @@ $api = new Api\Api();
 $type = 'api';
 $types = $dash->getTypes();
 $menus = $dash->getMenus();
-$currentUser = $auth->getCurrentUser();
 
-if (!$currentUser['id']) {
-    $url_words = explode('/', $_SERVER['REQUEST_URI']);
-    include_once __DIR__ . '/' . $url_words[2] . '/auth.php';
-    //$api->response->send(401);
+$api_version = explode('/', $_SERVER['REQUEST_URI'])[2];
+
+$authHeader = explode(' ', $api->getRequestHeaders()['Authorization']);
+$currentUser = $auth->getCurrentUser(base64_decode($authHeader[1]));
+
+if ($authHeader[0] == 'Bearer' && $currentUser['id']) {
+    //if logged in and has bearer token, allow data access
+    include_once __DIR__ . '/' . $api_version . '/data.php';
 } else {
-    $url_words = explode('/', $_SERVER['REQUEST_URI']);
-    include_once __DIR__ . '/' . $url_words[2] . '/auth.php';
+    //authenticate if not logged in
+    include_once __DIR__ . '/' . $api_version . '/auth.php';
 }
