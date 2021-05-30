@@ -1,14 +1,15 @@
 <?php
 header('Content-Type: application/vnd.api+json');
 
-$userpass = explode(':', base64_decode(explode(' ', $api->getRequestHeaders()['Authorization'])[1]));
-
 $accessArray = $auth->getApiAccess($userpass[0], $userpass[1]);
 
+//If user has access, pass bearer token
 if ($accessArray) {
     echo json_encode($accessArray);
-} else {
-    //Access denied
+}
+
+//Access denied
+else {
     $api->sendResponse(401);
 }
 

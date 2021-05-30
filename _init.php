@@ -14,12 +14,19 @@ $menus = $dash->getMenus();
 $api_version = explode('/', $_SERVER['REQUEST_URI'])[2];
 
 $authHeader = explode(' ', $api->getRequestHeaders()['Authorization']);
-$currentUser = $auth->getCurrentUser(base64_decode($authHeader[1]));
 
-if ($authHeader[0] == 'Bearer' && $currentUser['id']) {
-    //if logged in and has bearer token, allow data access
+//if logged in and has bearer token, allow data access
+if ($authHeader[0] == 'Bearer' && ($access_token = base64_decode($authHeader[1]))) {
+    $currentUser = $auth->getCurrentUser($access_token);
     include_once __DIR__ . '/' . $api_version . '/data.php';
-} else {
-    //authenticate if not logged in
+}
+
+//authenticate if not logged in
+else if ($authHeader[0] == 'Basic' && ($userpass = explode(':', base64_decode($authHeader[1])))) {
     include_once __DIR__ . '/' . $api_version . '/auth.php';
+}
+
+//Access denied
+else {
+    $api->sendResponse(401);
 }
