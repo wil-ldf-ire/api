@@ -11,3 +11,9 @@ $type = 'api';
 $types = $dash->getTypes();
 $menus = $dash->getMenus();
 $currentUser = $auth->getCurrentUser();
+
+if (!$currentUser['id']) {
+    $api->response->send(401);
+} else {
+    print_r($api->getRequestHeaders());
+}
