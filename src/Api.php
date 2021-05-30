@@ -2,83 +2,49 @@
 namespace Wildfire\Api;
 
 class Api {
-    // the information server responds with to client
-    private Response $response;
 
-    // request made by client
-    private Request $request;
-
-    private $request_headers;
+    private $response = array();
+    private $request = array();
 
     public function __construct() {
-        $this->response = new Response();
-        $this->request = new Request();
-        $this->request_headers = $this->request->getHeaders();
+
+    }
+
+    public function getRequestHeaders() {
+        return getallheaders();
+    }
+
+    public function getRequestBody(): array
+    {
+        return json_decode(file_get_contents('php://input'), 1) ?? [];
     }
 
     /**
-     * callback can only work with Response
-     * @param $callback
+     * sets http code to response and responds to the request
+     * @param int $status_code
      */
-    public function get($callback) {
-        if (!$this->isRequestMethod('get')) {
-            return;
+    public function sendResponse($status_code = 200) {
+        http_response_code($status_code);
+        $this->response['status'] = $status_code;
+
+        if (!$this->response['id']) {
+            $this->response['id'] = $this->guidv4();
         }
 
-        $callback($this->response);
-        $this->close();
-    }
-
-    /**
-     * callback can work with Response & Request
-     * @param $callback
-     */
-    public function post($callback) {
-        if (!$this->isRequestMethod('post')) {
-            return;
+        if ($status_code == 200) {
+            $this->response['title'] = 'OK';
+            $this->response['detail'] = 'Successful.';
+        } else if ($status_code == 415) {
+            $this->response['title'] = 'Unsupported Media Type';
+            $this->response['detail'] = 'Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.';
+        } else if ($status_code == 400) {
+            $this->response['title'] = 'Bad Request';
+        } else if ($status_code == 401) {
+            $this->response['title'] = 'Access Denied';
+            $this->response['detail'] = 'Stop.';
         }
 
-        $callback($this->response, $this->request);
-        $this->close();
-    }
-
-    /**
-     * callback can work with Response & Request
-     * @param $callback
-     */
-    public function put($callback) {
-        if (!$this->isRequestMethod('put')) {
-            return;
-        }
-
-        $callback($this->response, $this->request);
-        $this->close();
-    }
-
-    /**
-     * callback can work with Response & Request
-     * @param $callback
-     */
-    public function patch($callback) {
-        if (!$this->isRequestMethod('patch')) {
-            return;
-        }
-
-        $callback($this->response, $this->request);
-        $this->close();
-    }
-
-    /**
-     * callback can only work with Response
-     * @param $callback
-     */
-    public function delete($callback) {
-        if (!$this->isRequestMethod('delete')) {
-            return;
-        }
-
-        $callback($this->response);
-        $this->close();
+        echo json_encode($this->response);
     }
 
     /**
@@ -93,35 +59,22 @@ class Api {
         return $serverMethod === $reqMethod;
     }
 
-    /**
-     * respond with 404 if requested route isn't found
-     */
-    public function errorNotFound() {
-        http_response_code(404);
-    }
-
-    /**
-     * close the api connection
-     */
-    private function close() {
-        exit();
-    }
-
     /*
     Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.
      */
     public function isValidJsonRequest() {
         $error = 0;
+        $requestHeaders = $this->getRequestHeaders();
 
-        if (is_array($this->request_headers['Content-Type']) && in_array('application/vnd.api+json', $this->request_headers['Content-Type'])) {
+        if (is_array($requestHeaders['Content-Type']) && in_array('application/vnd.api+json', $requestHeaders['Content-Type'])) {
             //In some responses Content-type is an array
             $error = 1;
 
-        } else if (strstr($this->request_headers['Content-Type'], 'application/vnd.api+json')) {
+        } else if (strstr($requestHeaders['Content-Type'], 'application/vnd.api+json')) {
             $error = 1;
         }
         if ($error) {
-            $this->response->send(415);
+            $this->sendResponse(415);
             die();
         } else {
             return true;
@@ -144,9 +97,5 @@ class Api {
 
         // Output the 36 character UUID.
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-    }
-
-    public function getRequestHeaders() {
-        return $this->request_headers;
     }
 }
