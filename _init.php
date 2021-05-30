@@ -11,7 +11,8 @@ $type = 'api';
 $types = $dash->getTypes();
 $menus = $dash->getMenus();
 
-$api_version = explode('/', $_SERVER['REQUEST_URI'])[2];
+$thisUriArray = explode('/', $_SERVER['REQUEST_URI']);
+$api_version = $thisUriArray[2];
 
 $authHeader = explode(' ', $api->getRequestHeaders()['Authorization']);
 
