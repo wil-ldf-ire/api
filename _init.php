@@ -16,7 +16,7 @@ $api_version = explode('/', $_SERVER['REQUEST_URI'])[2];
 $authHeader = explode(' ', $api->getRequestHeaders()['Authorization']);
 
 //if logged in and has bearer token, allow data access
-if ($authHeader[0] == 'Bearer' && ($access_token = base64_decode($authHeader[1]))) {
+if ($authHeader[0] == 'Bearer' && ($access_token = $authHeader[1])) {
     $currentUser = $auth->getCurrentUser($access_token);
     include_once __DIR__ . '/' . $api_version . '/data.php';
 }
