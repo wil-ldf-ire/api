@@ -23,7 +23,7 @@ if ($authHeader[0] == 'Bearer' && ($access_token = $authHeader[1])) {
 }
 
 //authenticate if not logged in
-else if ($authHeader[0] == 'Basic') {
+else if ($authHeader[0] == 'Basic' && ($userpass = explode(':', base64_decode($authHeader[1])))) {
     include_once __DIR__ . '/' . $api_version . '/auth.php';
 }
 
