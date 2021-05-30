@@ -78,7 +78,7 @@ if ($currentUser['id']) {
                 $jsonOutput['data'][0]['attributes'] = $postdata;
                 $jsonOutput['data'][0]['links']['self'] = $_ENV['BASE_URL'] . '/' . $type . '/' . $slug;
                 if ($postdata['user_id']) {
-                    $jsonOutput['included'][0] = $auth->get_user($postdata['user_id']);
+                    $jsonOutput['included'][0] = $auth->getUser($postdata['user_id']);
                     $jsonOutput['included'][1] = $types[$type];
                 }
             } else {
