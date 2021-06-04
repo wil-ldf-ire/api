@@ -26,6 +26,7 @@ if ($currentUser['id']) {
 
     $jsonOutput['jsonapi'] = array(
         'version' => '1.0',
+        'whoami' => $currentUser['user_id'],
         'readmore' => 'https://github.com/wil-ldf-ire/tribe');
     $jsonOutput['links'] = array();
 
