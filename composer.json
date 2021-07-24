@@ -12,8 +12,8 @@
         }
     },
     "require": {
-    	"wildfire/core": "^2.1",
-    	"wildfire/auth": "^1.1"
+    	"wildfire/core": "^3.0",
+    	"wildfire/auth": "^2.0"
     },
     "autoload": {
         "psr-4": {
