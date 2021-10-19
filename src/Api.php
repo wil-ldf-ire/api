@@ -1,50 +1,73 @@
 <?php
 namespace Wildfire\Api;
 
+use \Wildfire\Core\Dash as Dash;
+use \Wildfire\Core\MySQL as SQL;
+
 class Api {
 
-    private $response = array();
-    private $request = array();
+    private $response;
+    private $request;
+    private $requestBody;
 
-    public function __construct() {
-
-    }
-
-    public function getRequestHeaders() {
-        return getallheaders();
-    }
-
-    public function getRequestBody(): array
+    public function __construct()
     {
-        return json_decode(file_get_contents('php://input'), 1) ?? [];
+        $this->requestBody = \json_decode(\file_get_contents('php://input'), 1) ?? [];
+    }
+
+    /**
+     * allow access to api only if the request meets certain permissions
+     * this function fetches bearer_token from auth header and verifies the
+     * jwt. Request only goes through if "allowed_role" matches the role
+     * on token.
+     */
+    public function auth($allowed_role)
+    {
+        $auth_head = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+
+        if (!$auth_head) {
+            return ["Bearer" => null];
+        }
+
+        $auth_head = \explode(' ', $auth_head);
+
+        if ($auth_head[0] == "Bearer") {
+            $auth_head = [ "token" => $auth_head[1] ?? "" ];
+        }
+
+        return $auth_head;
+    }
+
+    /**
+     * returns the request body as an array
+     */
+    public function body(): array
+    {
+        return $this->requestBody;
+    }
+
+    /**
+     * encodes passed data as a json that can be sent over network
+     * @param any $data
+     */
+    public function json($data): Api
+    {
+        $this->response = json_encode($data);
+        return $this;
     }
 
     /**
      * sets http code to response and responds to the request
      * @param int $status_code
      */
-    public function sendResponse($status_code = 200) {
+    public function send($status_code = 200)
+    {
+        // set header and status code
+        header('Content-Type: application/vnd.api+json');
         http_response_code($status_code);
-        $this->response['status'] = $status_code;
 
-        if (!$this->response['id']) {
-            $this->response['id'] = $this->guidv4();
-        }
-
-        if ($status_code == 200) {
-            $this->response['title'] = 'OK';
-            $this->response['detail'] = 'Successful.';
-        } else if ($status_code == 415) {
-            $this->response['title'] = 'Unsupported Media Type';
-            $this->response['detail'] = 'Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.';
-        } else if ($status_code == 400) {
-            $this->response['title'] = 'Bad Request';
-        } else if ($status_code == 401) {
-            $this->response['title'] = 'Access Denied';
-            $this->response['detail'] = 'Stop.';
-        }
-
-        echo json_encode($this->response);
+        echo $this->response;
+        die();
     }
 
     /**
@@ -52,7 +75,8 @@ class Api {
      * @param string $reqMethod
      * @return bool
      */
-    private function isRequestMethod(string $reqMethod): bool{
+    private function isRequestMethod(string $reqMethod): bool
+    {
         $serverMethod = strtolower($_SERVER['REQUEST_METHOD']);
         $reqMethod = strtolower($reqMethod);
 
@@ -60,9 +84,12 @@ class Api {
     }
 
     /*
-    Servers MUST respond with a 415 Unsupported Media Type status code if a request specifies the header Content-Type: application/vnd.api+json with any media type parameters.
+     * Servers MUST respond with a 415 Unsupported Media Type status code
+     * if a request specifies the header Content-Type: application/vnd.api+json
+     * with any media type parameters.
      */
-    public function isValidJsonRequest() {
+    public function isValidJsonRequest()
+    {
         $error = 0;
         $requestHeaders = $this->getRequestHeaders();
 
@@ -83,9 +110,10 @@ class Api {
     }
 
     /*
-    This small helper function generates RFC 4122 compliant Version 4 UUIDs.
+     * This small helper function generates RFC 4122 compliant Version 4 UUIDs.
      */
-    public function guidv4($data = null) {
+    public function guidv4($data = null)
+    {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
         $data = $data ?? random_bytes(16);
         assert(strlen($data) == 16);
@@ -97,5 +125,57 @@ class Api {
 
         // Output the 36 character UUID.
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+    public function findById(int $id)
+    {
+        $dash = new Dash;
+
+        return $dash->get_content($id);
+    }
+
+    public function findByType(string $type, int $index=0, int $limit=20)
+    {
+        $sql = new SQL;
+
+        $data = $sql->executeSQL("SELECT content from data
+            where
+                content->'$.type' = '$type'
+            order by id
+            limit $index,$limit
+        ");
+
+
+        if (!$data) {
+            $this->json([ 'error' => 'not found' ])->send(400);
+        }
+
+        if (\is_array($data)) {
+            $data = array_column($data, 'content');
+
+            foreach ($data as $d) {
+                $decoded_data[] = \json_decode($d, 1);
+            }
+        }
+
+        return $decoded_data;
+    }
+
+    public function findBySlug(string $type, string $slug)
+    {
+        $sql = new SQL;
+
+        $data = $sql->executeSQL("SELECT content from data
+            where
+                content->'$.type' = '$type' and
+                content->'$.slug' = '$slug'
+        ")[0]['content'];
+
+        return \json_decode($data, 1);
+    }
+
+    public function exposeTribeApi($url_parts, $all_types, $db_index=0, $db_limit=25)
+    {
+        require __DIR__."/../v1/static_apis.php";
     }
 }
