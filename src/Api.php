@@ -1,5 +1,8 @@
 <?php
-namespace Wildfire;
+namespace Wildfire\Api;
+
+use \Wildfire\Core\Dash as Dash;
+use \Wildfire\Core\MySQL as SQL;
 
 class Api {
 
@@ -9,18 +12,36 @@ class Api {
 
     public function __construct()
     {
-        $this->requestBody = json_decode(file_get_content('php://input'), 1) ?? [];
+        $this->requestBody = \json_decode(\file_get_contents('php://input'), 1) ?? [];
     }
 
-    public function getRequestHeaders()
+    /**
+     * allow access to api only if the request meets certain permissions
+     * this function fetches bearer_token from auth header and verifies the
+     * jwt. Request only goes through if "allowed_role" matches the role
+     * on token.
+     */
+    public function auth($allowed_role)
     {
-        return getallheaders();
+        $auth_head = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+
+        if (!$auth_head) {
+            return ["Bearer" => null];
+        }
+
+        $auth_head = \explode(' ', $auth_head);
+
+        if ($auth_head[0] == "Bearer") {
+            $auth_head = [ "token" => $auth_head[1] ?? "" ];
+        }
+
+        return $auth_head;
     }
 
     /**
      * returns the request body as an array
      */
-    public function request(): array
+    public function body(): array
     {
         return $this->requestBody;
     }
@@ -45,7 +66,8 @@ class Api {
         header('Content-Type: application/vnd.api+json');
         http_response_code($status_code);
 
-        echo json_encode($this->response);
+        echo $this->response;
+        die();
     }
 
     /**
@@ -103,5 +125,57 @@ class Api {
 
         // Output the 36 character UUID.
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+    public function findById(int $id)
+    {
+        $dash = new Dash;
+
+        return $dash->get_content($id);
+    }
+
+    public function findByType(string $type, int $index=0, int $limit=20)
+    {
+        $sql = new SQL;
+
+        $data = $sql->executeSQL("SELECT content from data
+            where
+                content->'$.type' = '$type'
+            order by id
+            limit $index,$limit
+        ");
+
+
+        if (!$data) {
+            $this->json([ 'error' => 'not found' ])->send(400);
+        }
+
+        if (\is_array($data)) {
+            $data = array_column($data, 'content');
+
+            foreach ($data as $d) {
+                $decoded_data[] = \json_decode($d, 1);
+            }
+        }
+
+        return $decoded_data;
+    }
+
+    public function findBySlug(string $type, string $slug)
+    {
+        $sql = new SQL;
+
+        $data = $sql->executeSQL("SELECT content from data
+            where
+                content->'$.type' = '$type' and
+                content->'$.slug' = '$slug'
+        ")[0]['content'];
+
+        return \json_decode($data, 1);
+    }
+
+    public function exposeTribeApi($url_parts, $all_types, $db_index=0, $db_limit=25)
+    {
+        require __DIR__."/../v1/static_apis.php";
     }
 }
