@@ -9,30 +9,31 @@ Step 2: Save the array returned. The array has a column called "access_token". T
 
 ### Data handling
 
-#### Single object
-GET request on /api/v1/$type/$slug or /api/v1/$type/$id
+#### Read Single object
+GET request on /api/s/$type/$slug or /api/s/$id
 
-#### Single attribute of an object
-GET request on /api/v1/single/$type/$slug/$attribute or /api/v1/single/$type/$id/$attribute
+#### Read Single attribute of an object
+GET request on /api/s/$type/$slug/$attribute or /api/s/$id/$attribute
 
-#### Multiple objects of one $type or search
-GET request on /api/v1/$type or /api/v1/search
+#### Read Multiple objects of one $type or search
+GET request on /api/s/$type or /api/s/search
 
 ##### Pagination
+GET request on /api/s/$type?index=0&limit=25
 
 ##### Sorting
 
 ##### Filtering
 
-#### To insert record
-POST request on /api/v1/$type/$slug or /api/v1/$type/$id
+#### To _create_ record
+POST request on /api/s/$type
 preferably include: user_id (of creator) and content_privacy
 
-#### To edit or update record
-PATCH request on /api/v1/$type/$slug or /api/v1/$type/$id
+#### To _edit/update_ record
+PATCH request on /api/s/$type/$slug or /api/s/$type/$id
 
-#### To delete record
-DELETE request on /api/v1/$type/$slug or /api/v1/$type/$id
+#### To _delete_ record
+DELETE request on /api/s/$type/$slug or /api/s/$type/$id
 mandatory to include: user_id (of creator)
 
 ### Important info

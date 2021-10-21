@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * This file is supposed to be called from \Wildfire\Api\Api and thus depends on
  * properties and functions of class Api. Please reference the Api class for
  * more clarity on this files behavior
@@ -21,7 +21,7 @@ switch (strtolower($_SERVER['REQUEST_METHOD'])) {
     case 'delete':
         delete($this, $url_parts, $all_types);
         break;
-    
+
     default:
         break;
 }
@@ -35,6 +35,10 @@ function fetch($api, $url_parts, $all_types) {
 
         if (!$res) {
             $api->json([ "error" => "id not found" ])->send(404);
+        }
+
+        if (isset($url_parts[2])) {
+            cherryPick($url_parts[2], $res);
         }
 
         $api->json($res)->send();
@@ -67,6 +71,10 @@ function fetch($api, $url_parts, $all_types) {
 
         if(!$res) {
             $api->json([ "error" => "type and slug match not found" ])->send(404);
+        }
+
+        if (isset($url_parts[3])) {
+            cherryPick($url_parts[3], $res);
         }
 
         $api->json($res)->send();
@@ -174,8 +182,30 @@ function delete($api, $url_parts, $all_types) {
     }
 
     $dash->do_delete([
-        'id' => $res['id'] 
+        'id' => $res['id']
     ]);
 
     $api->json(['success' => 'true'])->send();
+}
+
+function cherryPick($needle, $haystack) {
+    if (!$needle && !haystack) {
+        return false;
+    }
+
+    $api = new \Wildfire\Api\Api;
+
+    if (isset($haystack[$needle])) {
+        $api
+            ->json([
+                $needle => $haystack[$needle]
+            ])
+            ->send();
+    }
+
+    $api
+        ->json([
+            "error" => "'{$needle}' is not defined"
+        ])
+        ->send();
 }
