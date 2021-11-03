@@ -13,7 +13,8 @@
     },
     "require": {
     	"wildfire/core": "^3.0",
-    	"wildfire/auth": "^2.0"
+    	"wildfire/auth": "^2.0",
+        "alsvanzelf/jsonapi": "^2.3"
     },
     "autoload": {
         "psr-4": {
