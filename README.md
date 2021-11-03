@@ -10,30 +10,30 @@ JSON API implementation based on https://jsonapi.org/format
 ### Data handling
 
 #### Read Single object
-GET request on `/api/s/$type/$slug` or `/api/s/$id`
+GET request on `/api/$type/$slug` or `/api/$id`
 
 #### Read Single attribute of an object
-GET request on `/api/s/$type/$slug/$attribute` or `/api/s/$id/$attribute`
+GET request on `/api/$type/$slug/$attribute` or `/api/$id/$attribute`
 
 #### Read Multiple objects of one $type or search
-GET request on `/api/s/$type` or `/api/s/search`
+GET request on `/api/$type` or `/api/search`
 
 ##### Pagination
-GET request on `/api/s/$type?index=0&limit=25`
+GET request on `/api/$type?index=0&limit=25`
 
 ##### Sorting
 
 ##### Filtering
 
 #### To _create_ record
-POST request on `/api/s/$type`
+POST request on `/api/$type`
 preferably include: user_id (of creator) and content_privacy
 
 #### To _edit/update_ record
-PATCH request on `/api/s/$type/$slug` or `/api/s/$type/$id`
+PATCH request on `/api/$type/$slug` or `/api/$type/$id`
 
 #### To _delete_ record
-DELETE request on `/api/s/$type/$slug` or `/api/s/$type/$id`
+DELETE request on `/api/$type/$slug` or `/api/$type/$id`
 mandatory to include: user_id (of creator)
 
 ### Important info

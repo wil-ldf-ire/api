@@ -174,7 +174,7 @@ class Api {
         return \json_decode($data, 1);
     }
 
-    public function exposeTribeApi($url_parts, $all_types, $db_index=0, $db_limit=25)
+    public function exposeTribeApi($url_parts, $all_types)
     {
         require __DIR__."/../v1/static_apis.php";
     }

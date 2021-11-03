@@ -27,28 +27,31 @@ switch (strtolower($_SERVER['REQUEST_METHOD'])) {
 }
 
 function fetch($api, $url_parts, $all_types) {
+    $db_index = $_GET['index'] ?? 0;
+    $db_limit = $_GET['limit'] ?? 20;
+
     /////////////////////////
     // fetch records by id //
     /////////////////////////
-    if (is_numeric($url_parts[1])) {
-        $res = $api->findById($url_parts[1]);
+    if (is_numeric($url_parts[0])) {
+        $res = $api->findById($url_parts[0]);
 
         if (!$res) {
             $api->json([ "error" => "id not found" ])->send(404);
         }
 
-        if (isset($url_parts[2])) {
-            cherryPick($url_parts[2], $res);
+        if (isset($url_parts[1])) {
+            cherryPick($url_parts[1], $res);
         }
 
         $api->json($res)->send();
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    // if $url_parts[1] is a valid and defined 'type' and no 'slug' mentioned //
+    // if $url_parts[0] is a valid and defined 'type' and no 'slug' mentioned //
     ////////////////////////////////////////////////////////////////////////////
-    if (!$url_parts[2] && in_array($url_parts[1], $all_types)) {
-        $res = $api->findByType($url_parts[1], $db_index, $db_limit);
+    if (!$url_parts[1] && in_array($url_parts[0], $all_types)) {
+        $res = $api->findByType($url_parts[0], $db_index, $db_limit);
 
         if (!$res) {
             $api->json([ "error" => "type not found" ])->send(400);
@@ -64,10 +67,10 @@ function fetch($api, $url_parts, $all_types) {
     }
 
     /////////////////////////////////////////////////////////////////////////
-    // if $url_parts[1] is a valid and defined 'type' and 'slug' mentioned //
+    // if $url_parts[0] is a valid and defined 'type' and 'slug' mentioned //
     /////////////////////////////////////////////////////////////////////////
-    if ($url_parts[2] && in_array($url_parts[1], $all_types)) {
-        $res = $api->findBySlug($url_parts[1], $url_parts[2]);
+    if ($url_parts[1] && in_array($url_parts[0], $all_types)) {
+        $res = $api->findBySlug($url_parts[0], $url_parts[1]);
 
         if(!$res) {
             $api->json([ "error" => "type and slug match not found" ])->send(404);
@@ -86,7 +89,7 @@ function fetch($api, $url_parts, $all_types) {
 function create($api, $url_parts, $all_types) {
     $dash = new Wildfire\Core\Dash;
 
-    $type = $url_parts[1] ?? null;
+    $type = $url_parts[0] ?? null;
 
     if (!($type || in_array($type, $all_types))) {
         $api->json([ 'error' => 'not found' ])->send(404);
@@ -113,16 +116,16 @@ function create($api, $url_parts, $all_types) {
 function update($api, $url_parts, $all_types) {
     $dash = new \Wildfire\Core\Dash;
 
-    if (!is_numeric($url_parts[1]) && !$url_parts[2]) {
+    if (!is_numeric($url_parts[0]) && !$url_parts[1]) {
         $api->json(['error' => 'slug not mentioned'])->send(400);
     }
 
-    if (is_string($url_parts[1]) && $url_parts[2]) {
-        $id = (int)$dash->get_content_meta(array('type' => $url_parts[1], 'slug' => $url_parts[2]), 'id');
+    if (is_string($url_parts[0]) && $url_parts[1]) {
+        $id = (int)$dash->get_content_meta(array('type' => $url_parts[0], 'slug' => $url_parts[1]), 'id');
     }
 
-    if (is_numeric($url_parts[1])) {
-        $id = (int)$url_parts[1];
+    if (is_numeric($url_parts[0])) {
+        $id = (int)$url_parts[0];
     }
 
     $req = $api->body();
@@ -152,8 +155,8 @@ function update($api, $url_parts, $all_types) {
 function delete($api, $url_parts, $all_types) {
     $dash = new Wildfire\Core\Dash;
 
-    if (is_numeric($url_parts[1])) {
-        $id = (int)$url_parts[1];
+    if (is_numeric($url_parts[0])) {
+        $id = (int)$url_parts[0];
 
         $res_0 = $dash->get_content($id);
 
@@ -171,11 +174,11 @@ function delete($api, $url_parts, $all_types) {
         $api->json(['error' => 'something went wrong'])->send(503);
     }
 
-    if (!$url_parts[2] || !in_array($url_parts[1], $all_types)) {
+    if (!$url_parts[1] || !in_array($url_parts[0], $all_types)) {
         $api->json(['error' => 'invalid request'])->send(400);
     }
 
-    $res = $dash->get_content(['type' => $url_parts[1], 'slug' => $url_parts[2] ]);
+    $res = $dash->get_content(['type' => $url_parts[0], 'slug' => $url_parts[1] ]);
 
     if (!$res) {
         $api->json(['error' => 'record not found'])->send(404);
