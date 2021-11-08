@@ -4,6 +4,10 @@
  * properties and functions of class Api. Please reference the Api class for
  * more clarity on this files behavior
  */
+use alsvanzelf\jsonapi\ErrorsDocument;
+use alsvanzelf\jsonapi\ResourceDocument;
+use alsvanzelf\jsonapi\CollectionDocument;
+use alsvanzelf\jsonapi\objects\ResourceObject;
 
 switch (strtolower($_SERVER['REQUEST_METHOD'])) {
     case 'get':
@@ -27,63 +31,102 @@ switch (strtolower($_SERVER['REQUEST_METHOD'])) {
 }
 
 function fetch($api, $url_parts, $all_types) {
-    $db_index = $_GET['index'] ?? 0;
-    $db_limit = $_GET['limit'] ?? 20;
+    try {
+        $check_use_id = false;  // default value will be overriden if required
 
-    /////////////////////////
-    // fetch records by id //
-    /////////////////////////
-    if (is_numeric($url_parts[0])) {
-        $res = $api->findById($url_parts[0]);
-
-        if (!$res) {
-            $api->json([ "error" => "id not found" ])->send(404);
+        if (is_numeric($url_parts[0])) {    // if request has only numeric id
+            $check_use_id = true;
+            $use_id = true;
+        } else if ($url_parts[1] && in_array($url_parts[0], $all_types)) {  // valid type and slug
+            $check_use_id = true;
+            $use_id = false;
         }
 
-        if (isset($url_parts[1])) {
-            cherryPick($url_parts[1], $res);
+        if ($check_use_id) {
+            if ($use_id) {
+                $res = $api->findById($url_parts[0]);
+            } else {
+                $res = $api->findBySlug($url_parts[0], $url_parts[1]);
+            }
+
+            if (!$res) {    // send 404 message
+                throw new Exception('unknown id', 404);
+            }
+
+            $doc = new ResourceDocument($type=$res['type'], $id=$res['id']);
+            unset($res['type'], $res['id']);
+
+            if (isset($_GET['filter'])) {
+                $filter = explode(',', $_GET['filter']);
+
+                foreach($filter as $f) {
+                    $doc->add($f, $res[$f]);
+                }
+            } else {
+                foreach($res as $key => $value) {
+                    $doc->add($key, $value);
+                }
+            }
+
+            $doc->sendResponse();
+            die();
         }
 
-        $api->json($res)->send();
-    }
+        /**
+         * $url_parts[0]: valid
+         * type: defined & valid
+         * slug: undefined
+         */
+        if (!$url_parts[1] && in_array($url_parts[0], $all_types)) {
+            $db_index = $_GET['index'] ?? 0;
+            $db_limit = $_GET['limit'] ?? 20;
 
-    ////////////////////////////////////////////////////////////////////////////
-    // if $url_parts[0] is a valid and defined 'type' and no 'slug' mentioned //
-    ////////////////////////////////////////////////////////////////////////////
-    if (!$url_parts[1] && in_array($url_parts[0], $all_types)) {
-        $res = $api->findByType($url_parts[0], $db_index, $db_limit);
+            $res = $api->findByType($url_parts[0], $db_index, $db_limit);
 
-        if (!$res) {
-            $api->json([ "error" => "type not found" ])->send(400);
+            if (!$res) {
+                throw new Exception('unknown id', 404);
+            }
+
+            foreach($res as $r) {
+                $temp = new ResourceObject($r['type'], $r['id']);
+
+                if (isset($_GET['filter'])) {
+                    $filters = explode(',', $_GET['filter']);
+
+                    foreach($filters as $filter) {
+                        $temp->add($filter, $r[$filter]);
+                    }
+                } else {
+                    unset($r['id'], $r['type']);
+
+                    foreach($r as $key => $value) {
+                        $temp->add($key, $value);
+                    }
+                }
+
+                $final_object[] = $temp;
+            }
+
+            $doc = CollectionDocument::fromResources(...$final_object);
+            $doc->sendResponse();
+            die();
         }
 
-        $res = [
-            "index" => $db_index,
-            "limit" => $db_limit,
-            "data" => $res
+        // default error
+        throw new Exception('unknown request', 404);
+    } catch (Exception $e) {
+        $options = [
+            'includeExceptionTrace'    => false,
+            'includeExceptionPrevious' => false,
         ];
+        $document = ErrorsDocument::fromException($e, $options);
 
-        $api->json($res)->send();
+        $options = [
+            'prettyPrint' => true,
+        ];
+        echo $document->sendResponse();
+        die();
     }
-
-    /////////////////////////////////////////////////////////////////////////
-    // if $url_parts[0] is a valid and defined 'type' and 'slug' mentioned //
-    /////////////////////////////////////////////////////////////////////////
-    if ($url_parts[1] && in_array($url_parts[0], $all_types)) {
-        $res = $api->findBySlug($url_parts[0], $url_parts[1]);
-
-        if(!$res) {
-            $api->json([ "error" => "type and slug match not found" ])->send(404);
-        }
-
-        if (isset($url_parts[3])) {
-            cherryPick($url_parts[3], $res);
-        }
-
-        $api->json($res)->send();
-    }
-
-    $api->json([ 'error' => 'not found' ])->send(404);
 }
 
 function create($api, $url_parts, $all_types) {
@@ -189,26 +232,4 @@ function delete($api, $url_parts, $all_types) {
     ]);
 
     $api->json(['success' => 'true'])->send();
-}
-
-function cherryPick($needle, $haystack) {
-    if (!$needle && !haystack) {
-        return false;
-    }
-
-    $api = new \Wildfire\Api\Api;
-
-    if (isset($haystack[$needle])) {
-        $api
-            ->json([
-                $needle => $haystack[$needle]
-            ])
-            ->send();
-    }
-
-    $api
-        ->json([
-            "error" => "'{$needle}' is not defined"
-        ])
-        ->send();
 }
