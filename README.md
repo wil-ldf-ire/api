@@ -24,6 +24,8 @@ GET request on `/api/$type?index=0&limit=25`
 ##### Sorting
 
 ##### Filtering
+Data can be cherry picked passing the "filter" query in URL with the desired data.  
+`GET` request using `?filter=name,age,location,email`
 
 #### To _create_ record
 POST request on `/api/$type`
