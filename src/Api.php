@@ -176,6 +176,6 @@ class Api {
 
     public function exposeTribeApi($url_parts, $all_types)
     {
-        require __DIR__."/../v1/static_apis.php";
+        require __DIR__."/../v1/handler.php";
     }
 }
