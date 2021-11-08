@@ -12,9 +12,6 @@ JSON API implementation based on https://jsonapi.org/format
 #### Read Single object
 GET request on `/api/$type/$slug` or `/api/$id`
 
-#### Read Single attribute of an object
-GET request on `/api/$type/$slug/$attribute` or `/api/$id/$attribute`
-
 #### Read Multiple objects of one $type or search
 GET request on `/api/$type` or `/api/search`
 
