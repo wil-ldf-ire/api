@@ -174,8 +174,9 @@ class Api {
         return \json_decode($data, 1);
     }
 
-    public function exposeTribeApi($url_parts, $all_types)
+    public function exposeTribeApi(array $url_parts, array $all_types): void
     {
         require __DIR__."/../v1/handler.php";
+        return;
     }
 }

@@ -2,20 +2,25 @@
 /*
  * This file is supposed to be called from \Wildfire\Api\Api and thus depends on
  * properties and functions of class Api. Please reference the Api class for
- * more clarity on this files behavior
+ * more clarity on this file's behavior
  */
 use alsvanzelf\jsonapi\ErrorsDocument;
 use alsvanzelf\jsonapi\ResourceDocument;
 use alsvanzelf\jsonapi\CollectionDocument;
 use alsvanzelf\jsonapi\objects\ResourceObject;
 
+// route requests based on method
 switch (strtolower($_SERVER['REQUEST_METHOD'])) {
     case 'get':
         fetch($this, $url_parts, $all_types);
         break;
 
     case 'post':
-        create($this, $url_parts, $all_types);
+        if ($url_parts[0] == 'file-upload') {
+            upload($this);
+        } else {
+            create($this, $url_parts, $all_types);
+        }
         break;
 
     case 'put':
@@ -27,10 +32,12 @@ switch (strtolower($_SERVER['REQUEST_METHOD'])) {
         break;
 
     default:
+        $this->json(['error' => 'request method not allowed'])->send(403);
         break;
 }
 
-function fetch($api, $url_parts, $all_types) {
+function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+{
     try {
         $check_use_id = false;  // default value will be overriden if required
 
@@ -69,7 +76,7 @@ function fetch($api, $url_parts, $all_types) {
             }
 
             $doc->sendResponse();
-            die();
+            return;
         }
 
         /**
@@ -109,7 +116,7 @@ function fetch($api, $url_parts, $all_types) {
 
             $doc = CollectionDocument::fromResources(...$final_object);
             $doc->sendResponse();
-            die();
+            return;
         }
 
         // default error
@@ -125,11 +132,12 @@ function fetch($api, $url_parts, $all_types) {
             'prettyPrint' => true,
         ];
         echo $document->sendResponse();
-        die();
+        return;
     }
 }
 
-function create($api, $url_parts, $all_types) {
+function create(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+{
     $dash = new Wildfire\Core\Dash;
 
     $type = $url_parts[0] ?? null;
@@ -156,7 +164,8 @@ function create($api, $url_parts, $all_types) {
     $api->json($res)->send();
 }
 
-function update($api, $url_parts, $all_types) {
+function update(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+{
     $dash = new \Wildfire\Core\Dash;
 
     if (!is_numeric($url_parts[0]) && !$url_parts[1]) {
@@ -195,7 +204,8 @@ function update($api, $url_parts, $all_types) {
     $api->json($res)->send();
 }
 
-function delete($api, $url_parts, $all_types) {
+function delete(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+{
     $dash = new Wildfire\Core\Dash;
 
     if (is_numeric($url_parts[0])) {
@@ -232,4 +242,61 @@ function delete($api, $url_parts, $all_types) {
     ]);
 
     $api->json(['success' => 'true'])->send();
+}
+
+function upload(\Wildfire\Api\Api $api): void
+{
+    // $api->json($_FILES)->send();
+    if (!$_FILES) {
+        $api->json(['error' => 'no files uploaded'])->send();
+    }
+
+    $dash = new \Wildfire\Core\Dash;
+    $uploads_dir = $dash->get_upload_dir_path();
+    $uploads_base_url = $dash->get_upload_dir_url();
+
+    foreach($_FILES['files']['error'] as $key => $error) {
+        if ($error != UPLOAD_ERR_OK) {
+            continue;
+        }
+
+        $tmp_name = $_FILES['files']['tmp_name'][$key];
+
+        // basename() may prevent filesystem traversal attacks;
+        $filename = basename($_FILES['files']['name'][$key]);
+
+        // validating mime type for file
+        $mime_type = mime_content_type($tmp_name);
+        $mime_type = str_replace('/', '.', $mime_type); // replace '/' with period
+        $valid_mime =  (bool) preg_match(UPLOAD_FILE_TYPES, $mime_type);
+
+        if (!($dash->checkFileUploadName($filename) && $valid_mime)) {
+            continue;
+        }
+
+        $loc = "{$uploads_dir}/{$filename}";
+        if (file_exists($loc)) {
+            $suffix = 0;
+            list($name, $ext) = explode('.', $filename);
+
+            while(file_exists($loc)) {
+                $suffix++;
+                $filename = "{$name}-{$suffix}.${ext}";
+                $loc = "{$uploads_dir}/{$filename}";
+            }
+        }
+
+        move_uploaded_file($tmp_name, $loc);
+        $tribe_root = TRIBE_ROOT;
+        $upload_path = preg_replace("/.*(?=\/uploads)/", "", $loc);
+
+        $res[] = [
+            'name' => $filename,
+            'type' => $_FILES['files']['type'][$key],
+            'path' => $upload_path,
+            'url' => "$uploads_base_url/$filename"
+        ];
+    } // foreach
+
+    $api->json($res)->send();
 }
