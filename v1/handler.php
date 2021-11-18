@@ -246,7 +246,6 @@ function delete(\Wildfire\Api\Api $api, array $url_parts, array $all_types): voi
 
 function upload(\Wildfire\Api\Api $api): void
 {
-    // $api->json($_FILES)->send();
     if (!$_FILES) {
         $api->json(['error' => 'no files uploaded'])->send();
     }
