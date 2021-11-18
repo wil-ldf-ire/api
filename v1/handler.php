@@ -255,6 +255,10 @@ function upload(\Wildfire\Api\Api $api): void
     $uploads_dir = $dash->get_upload_dir_path();
     $uploads_base_url = $dash->get_upload_dir_url();
 
+    if (!file_exists($uploads_dir)) {
+        mkdir($uploads_dir, 0755);
+    }
+
     foreach($_FILES['files']['error'] as $key => $error) {
         if ($error != UPLOAD_ERR_OK) {
             continue;
