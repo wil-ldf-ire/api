@@ -36,7 +36,7 @@ DELETE request on `/api/$type/$slug` or `/api/$type/$id`
 mandatory to include: user_id (of creator)
 
 #### Upload interface
-`/api/file-upload`
+**POST** `/api/file-upload`
 1. Include the js file `tribe_upload.js` under `dist` in your project (or use it as a reference to implement your own)
 2. create a button that you want to program for upload with a `data-target='#input-file'` ('#input-file' can be anything you want, but mention a target)
 3. Initialize the code by passing selector of your event initiator (i.e. button created in step 2) and defining the api URL `tribeUploadUrl`
