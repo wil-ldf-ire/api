@@ -31,6 +31,7 @@ async function uploadFile(formData) {
         });
 
         const result = await response.json();
+        let tribeUploadResponse = result;
     } catch (e) {
         console.log(e);
     }
