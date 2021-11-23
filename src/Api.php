@@ -127,13 +127,6 @@ class Api {
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
-    public function findById(int $id)
-    {
-        $dash = new Dash;
-
-        return $dash->get_content($id);
-    }
-
     public function findByType(string $type, int $index=0, int $limit=20)
     {
         $sql = new SQL;

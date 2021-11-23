@@ -8,6 +8,7 @@ use alsvanzelf\jsonapi\ErrorsDocument;
 use alsvanzelf\jsonapi\ResourceDocument;
 use alsvanzelf\jsonapi\CollectionDocument;
 use alsvanzelf\jsonapi\objects\ResourceObject;
+use Wildfire\Core\Dash as Dash;
 
 // route requests based on method
 switch (strtolower($_SERVER['REQUEST_METHOD'])) {
@@ -39,6 +40,7 @@ switch (strtolower($_SERVER['REQUEST_METHOD'])) {
 function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
 {
     try {
+        $dash = new Dash;
         $check_use_id = false;  // default value will be overriden if required
 
         if (is_numeric($url_parts[0])) {    // if request has only numeric id
@@ -51,7 +53,7 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
 
         if ($check_use_id) {
             if ($use_id) {
-                $res = $api->findById($url_parts[0]);
+                $res = $dash->findById($url_parts[0]);
             } else {
                 $res = $api->findBySlug($url_parts[0], $url_parts[1]);
             }
@@ -247,7 +249,7 @@ function delete(\Wildfire\Api\Api $api, array $url_parts, array $all_types): voi
 function upload(\Wildfire\Api\Api $api): void
 {
     if (!$_FILES) {
-        $api->json(['error' => 'no files uploaded'])->send();
+        $api->json(['error' => 'no files uploaded'])->send(403);
     }
 
     $dash = new \Wildfire\Core\Dash;
@@ -273,8 +275,12 @@ function upload(\Wildfire\Api\Api $api): void
         $mime_type = str_replace('/', '.', $mime_type); // replace '/' with period
         $valid_mime =  (bool) preg_match(UPLOAD_FILE_TYPES, $mime_type);
 
-        if (!($dash->checkFileUploadName($filename) && $valid_mime)) {
-            continue;
+        if (!$dash->checkFileUploadName($filename)) {
+            $api->json([ 'error' => 'filename not allowed' ])->send(403);
+        }
+
+        if (!$valid_mime) {
+            $api->json(['error' => 'mime type not allowed'])->send(403);
         }
 
         $loc = "{$uploads_dir}/{$filename}";
