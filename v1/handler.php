@@ -194,6 +194,10 @@ function update(\Wildfire\Api\Api $api, array $url_parts, array $all_types): voi
     }
 
     foreach ($req as $key => $value) {
+        if (gettype($value) == 'array') {
+            $value = json_encode($value);
+        }
+
         $status = $dash->push_content_meta($id, $key, $value);
 
         if (!$status) {
