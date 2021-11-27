@@ -137,7 +137,7 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
         ];
         $document = ErrorsDocument::fromException($e, $options);
 
-        $document->setHttpStatusCode(500);
+        $document->setHttpStatusCode($e->getCode());
         $document->sendResponse();
         return;
     }

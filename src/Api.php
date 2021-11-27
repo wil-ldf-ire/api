@@ -165,6 +165,8 @@ class Api {
                 content->'$.slug' = '$slug'
         ")[0]['content'];
 
+        if (!$data) return null;
+
         return \json_decode($data, 1);
     }
 
