@@ -51,6 +51,11 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
             $use_id = false;
         }
 
+        $options = [
+            'prettyPrint' => true,
+            'encodeOptions' =>  JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PARTIAL_OUTPUT_ON_ERROR
+        ];
+
         if ($check_use_id) {
             if ($use_id) {
                 $res = $dash->findById($url_parts[0]);
@@ -77,7 +82,8 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
                 }
             }
 
-            $doc->sendResponse();
+            // echo "<pre>".json_encode($res, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_PRETTY_PRINT)."</pre>";
+            $doc->sendResponse($options);
             return;
         }
 
@@ -117,7 +123,7 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
             }
 
             $doc = CollectionDocument::fromResources(...$final_object);
-            $doc->sendResponse();
+            $doc->sendResponse($options);
             return;
         }
 
@@ -127,13 +133,12 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
         $options = [
             'includeExceptionTrace'    => false,
             'includeExceptionPrevious' => false,
+            'prettyPrint' => true,
         ];
         $document = ErrorsDocument::fromException($e, $options);
 
-        $options = [
-            'prettyPrint' => true,
-        ];
-        echo $document->sendResponse();
+        $document->setHttpStatusCode(500);
+        $document->sendResponse();
         return;
     }
 }
