@@ -128,48 +128,6 @@ class Api {
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
-    public function findByType(string $type, int $index=0, int $limit=20)
-    {
-        $sql = new SQL;
-
-        $data = $sql->executeSQL("SELECT content from data
-            where
-                content->'$.type' = '$type'
-            order by id
-            limit $index,$limit
-        ");
-
-
-        if (!$data) {
-            $this->json([ 'error' => 'not found' ])->send(400);
-        }
-
-        if (\is_array($data)) {
-            $data = array_column($data, 'content');
-
-            foreach ($data as $d) {
-                $decoded_data[] = \json_decode($d, 1);
-            }
-        }
-
-        return $decoded_data;
-    }
-
-    public function findBySlug(string $type, string $slug)
-    {
-        $sql = new SQL;
-
-        $data = $sql->executeSQL("SELECT content from data
-            where
-                content->'$.type' = '$type' and
-                content->'$.slug' = '$slug'
-        ")[0]['content'];
-
-        if (!$data) return null;
-
-        return \json_decode($data, 1);
-    }
-
     public function exposeTribeApi(array $url_parts, array $all_types): void
     {
         require __DIR__."/../v1/handler.php";

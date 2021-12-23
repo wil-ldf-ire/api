@@ -9,6 +9,7 @@ use alsvanzelf\jsonapi\ResourceDocument;
 use alsvanzelf\jsonapi\CollectionDocument;
 use alsvanzelf\jsonapi\objects\ResourceObject;
 use Wildfire\Core\Dash as Dash;
+use \Wildfire\Core\MySQL as MySQL;
 
 // route requests based on method
 switch (strtolower($_SERVER['REQUEST_METHOD'])) {
@@ -41,6 +42,7 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
 {
     try {
         $dash = new Dash;
+        $sql = new MySQL;
         $check_use_id = false;  // default value will be overriden if required
 
         if (is_numeric($url_parts[0])) {    // if request has only numeric id
@@ -58,9 +60,9 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
 
         if ($check_use_id) {
             if ($use_id) {
-                $res = $dash->findById($url_parts[0]);
+                $res = $sql->get($url_parts[0]);
             } else {
-                $res = $api->findBySlug($url_parts[0], $url_parts[1]);
+                $res = $dash->get_content(['type' => $url_parts[0], 'slug' => $url_parts[1]]);
             }
 
             if (!$res) {    // send 404 message
@@ -82,7 +84,6 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
                 }
             }
 
-            // echo "<pre>".json_encode($res, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_PRETTY_PRINT)."</pre>";
             $doc->sendResponse($options);
             return;
         }
@@ -96,7 +97,8 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
             $db_index = $_GET['index'] ?? 0;
             $db_limit = $_GET['limit'] ?? 20;
 
-            $res = $api->findByType($url_parts[0], $db_index, $db_limit);
+            $res = $dash->get_all_ids($url_parts[0], 'id', 'ASC', "$db_index,$db_limit");
+            $res = $dash->get_content($res, true);
 
             if (!$res) {
                 throw new Exception('unknown id', 404);
