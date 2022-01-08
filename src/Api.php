@@ -53,7 +53,7 @@ class Api {
     public function json($data): Api
     {
         $encodeOptions =  JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PARTIAL_OUTPUT_ON_ERROR;
-        $this->response = json_encode($data, $options);
+        $this->response = json_encode($data, $encodeOptions);
         return $this;
     }
 
