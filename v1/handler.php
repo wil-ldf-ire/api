@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is supposed to be called from \Wildfire\Api\Api and thus depends on
+ * This file is supposed to be called from \Wildfire\Api and thus depends on
  * properties and functions of class Api. Please reference the Api class for
  * more clarity on this file's behavior
  */
@@ -38,7 +38,7 @@ switch (strtolower($_SERVER['REQUEST_METHOD'])) {
         break;
 }
 
-function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+function fetch(\Wildfire\Api $api, array $url_parts, array $all_types): void
 {
     try {
         $dash = new Dash;
@@ -145,7 +145,7 @@ function fetch(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
     }
 }
 
-function create(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+function create(\Wildfire\Api $api, array $url_parts, array $all_types): void
 {
     $dash = new Wildfire\Core\Dash;
 
@@ -173,7 +173,7 @@ function create(\Wildfire\Api\Api $api, array $url_parts, array $all_types): voi
     $api->json($res)->send();
 }
 
-function update(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+function update(\Wildfire\Api $api, array $url_parts, array $all_types): void
 {
     $dash = new \Wildfire\Core\Dash;
 
@@ -217,7 +217,7 @@ function update(\Wildfire\Api\Api $api, array $url_parts, array $all_types): voi
     $api->json($res)->send();
 }
 
-function delete(\Wildfire\Api\Api $api, array $url_parts, array $all_types): void
+function delete(\Wildfire\Api $api, array $url_parts, array $all_types): void
 {
     $dash = new Wildfire\Core\Dash;
 
@@ -257,7 +257,7 @@ function delete(\Wildfire\Api\Api $api, array $url_parts, array $all_types): voi
     $api->json(['success' => 'true'])->send();
 }
 
-function upload(\Wildfire\Api\Api $api): void
+function upload(\Wildfire\Api $api): void
 {
     if (!$_FILES) {
         $api->json(['error' => 'no files uploaded'])->send(403);

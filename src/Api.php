@@ -1,5 +1,5 @@
 <?php
-namespace Wildfire\Api;
+namespace Wildfire;
 
 use \Wildfire\Core\Dash as Dash;
 use \Wildfire\Core\MySQL as SQL;
