@@ -2,7 +2,7 @@
 $sql = new \Wildfire\Core\MySQL();
 $dash = new \Wildfire\Core\Dash();
 $admin = new \Wildfire\Core\Admin();
-$auth = new \Wildfire\Auth\Auth();
+$auth = new \Wildfire\Auth();
 $api = new \Wildfire\Api();
 
 $type = 'api';
