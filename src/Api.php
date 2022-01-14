@@ -76,7 +76,7 @@ class Api {
      * @param string $reqMethod
      * @return bool
      */
-    private function isRequestMethod(string $reqMethod): bool
+    public function method(string $reqMethod): bool
     {
         $serverMethod = strtolower($_SERVER['REQUEST_METHOD']);
         $reqMethod = strtolower($reqMethod);
