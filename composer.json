@@ -1,6 +1,6 @@
 {
     "name": "wildfire/api",
-    "description": "JSON API for Tribe",
+    "description": "JSON API for Tribe (v0.1.17)",
     "repositories": {
         "wildfire/core": {
             "type": "git",
