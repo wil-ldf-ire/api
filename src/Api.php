@@ -1,6 +1,7 @@
 <?php
 namespace Wildfire;
 
+use JetBrains\PhpStorm\NoReturn;
 use \Wildfire\Core\Dash as Dash;
 use \Wildfire\Core\MySQL as SQL;
 
@@ -21,7 +22,7 @@ class Api {
      * jwt. Request only goes through if "allowed_role" matches the role
      * on token.
      */
-    public function auth($allowed_role)
+    public function auth($allowed_role): array
     {
         $auth_head = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
 
@@ -48,7 +49,6 @@ class Api {
 
     /**
      * encodes passed data as a json that can be sent over network
-     * @param any $data
      */
     public function json($data): Api
     {
@@ -61,7 +61,8 @@ class Api {
      * sets http code to response and responds to the request
      * @param int $status_code
      */
-    public function send($status_code = 200)
+    #[NoReturn]
+    public function send(int $status_code = 200)
     {
         // set header and status code
         header('Content-Type: application/vnd.api+json');
