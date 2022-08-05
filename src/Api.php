@@ -74,11 +74,15 @@ class Api {
 
     /**
      * validates request method for API calls
-     * @param string $reqMethod
-     * @return bool
+     * @param ?string $reqMethod
+     * @return bool|string
      */
-    public function method(string $reqMethod): bool
+    public function method(string $reqMethod = null)
     {
+        if (!$reqMethod) {
+            return strtolower($_SERVER['REQUEST_METHOD']);
+        }
+
         $serverMethod = strtolower($_SERVER['REQUEST_METHOD']);
         $reqMethod = strtolower($reqMethod);
 
