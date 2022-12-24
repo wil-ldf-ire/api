@@ -5,7 +5,7 @@ use JetBrains\PhpStorm\NoReturn;
 use \Tribe\Dash as Dash;
 use \Tribe\MySQL as SQL;
 
-class Api {
+class API {
 
     private $response;
     private $request;
