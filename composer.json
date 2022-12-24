@@ -4,11 +4,11 @@
     "repositories": {
         "tribe/core": {
             "type": "git",
-            "url": "https://github.com/wil-ldf-ire/core.git"
+            "url": "https://github.com/wil-ldf-ire/tribe-core.git"
         },
         "tribe/auth": {
             "type": "git",
-            "url": "https://github.com/wil-ldf-ire/auth.git"
+            "url": "https://github.com/wil-ldf-ire/tribe-auth.git"
         }
     },
     "require": {
