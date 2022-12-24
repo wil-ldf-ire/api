@@ -1,9 +1,9 @@
 <?php
-namespace Wildfire;
+namespace Tribe;
 
 use JetBrains\PhpStorm\NoReturn;
-use \Wildfire\Core\Dash as Dash;
-use \Wildfire\Core\MySQL as SQL;
+use \Tribe\Dash as Dash;
+use \Tribe\MySQL as SQL;
 
 class Api {
 
